@@ -1,0 +1,5 @@
+rootProject.name = 'sungjee'
+include 'redis'
+include 'redis:master-slave'
+findProject(':redis:master-slave')?.name = 'master-slave'
+

@@ -1,0 +1,59 @@
+version: '3'
+services:
+  master:
+    container_name: master
+    image: redis
+    ports:
+      - 7001:6379
+  slave-1:
+    container_name: slave-1
+    image: redis
+    ports:
+      - 7002:6379
+    volumes:
+      - ./conf:/usr/local/etc/redis/
+    command: redis-server /usr/local/etc/redis/redis_slave1.conf
+  slave-2:
+    container_name: slave-2
+    image: redis
+    ports:
+      - 7003:6379
+    volumes:
+      - ./conf:/usr/local/etc/redis/
+    command: redis-server /usr/local/etc/redis/redis_slave2.conf
+
+  sentinel-1:
+    container_name: sentinel-1
+    image: redis
+    ports:
+      - 7004:6379
+    volumes:
+      - ./conf:/usr/local/etc/redis/
+    command: redis-server /usr/local/etc/redis/sentinel_1.conf --sentinel
+
+  sentinel-2:
+    container_name: sentinel-2
+    image: redis
+    ports:
+      - 7005:6379
+    volumes:
+      - ./conf:/usr/local/etc/redis/
+    command: redis-server /usr/local/etc/redis/sentinel_2.conf --sentinel
+
+  sentinel-3:
+    container_name: sentinel-3
+    image: redis
+    ports:
+      - 7006:6379
+    volumes:
+      - ./conf:/usr/local/etc/redis/
+    command: redis-server /usr/local/etc/redis/sentinel_3.conf --sentinel
+#  redis-commander:
+#    container_name: redis-commander
+#    hostname: redis-commander
+#    image: rediscommander/redis-commander:latest
+#    restart: always
+#    environment:
+#    - REDIS_HOSTS=master:master,slave-1:slave-1,slave-2:slave-2
+#    ports:
+#    - 8081:8081
