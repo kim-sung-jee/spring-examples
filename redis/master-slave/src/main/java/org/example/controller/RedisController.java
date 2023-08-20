@@ -20,16 +20,16 @@ public class RedisController {
 
     @GetMapping("/{name}")
     public void addToSet(@PathVariable String name) {
-        this.template.opsForSet().add(KEY, name);
+        this.template.opsForValue().set(KEY, name);
     }
 
     @GetMapping("/name")
-    public Set<String> getKeyValues(){
+    public String getKeyValues(){
         List<RedisClientInfo> clientList = template.getClientList();
         System.out.println(clientList.size());
         for (RedisClientInfo redisClientInfo : clientList) {
             System.out.println(redisClientInfo);
         }
-        return this.template.opsForSet().members(KEY);
+        return this.template.opsForValue().get(KEY);
     }
 }

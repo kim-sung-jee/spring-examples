@@ -4,6 +4,8 @@ import io.lettuce.core.ReadFrom;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisClusterConfiguration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStaticMasterReplicaConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
@@ -18,35 +20,17 @@ public class RedisConfiguration {
 
     private RedisInstance master;
     private List<RedisInstance> slaves;
-
-    RedisInstance getMaster() {
-        return master;
-    }
-
-    void setMaster(RedisInstance master) {
-        this.master = master;
-    }
-
-    List<RedisInstance> getSlaves() {
-        return slaves;
-    }
-
-    void setSlaves(List<RedisInstance> slaves) {
-        this.slaves = slaves;
-    }
+    private List<RedisInstance> sentinels;
 
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .readFrom(ReadFrom.REPLICA_PREFERRED)
+                .readFrom(ReadFrom.ANY)
                 .build();
 
         RedisStaticMasterReplicaConfiguration staticMasterReplicaConfiguration = new RedisStaticMasterReplicaConfiguration(this.getMaster().getHost(), this.getMaster().getPort());
         this.getSlaves().forEach(slave -> staticMasterReplicaConfiguration.addNode(slave.getHost(), slave.getPort()));
-//
-//        RedisSentinelConfiguration redisSentinelConfiguration = new RedisSentinelConfiguration()
-//                .master("matser")
-//                .sentinel("localhost",5000);
+        this.getSentinels().forEach(sentinel -> staticMasterReplicaConfiguration.addNode(sentinel.getHost(),sentinel.getPort()));
         System.out.println(master.getHost());
         System.out.println(master.getPort());
         for (RedisInstance slave : slaves) {
@@ -55,7 +39,6 @@ public class RedisConfiguration {
         }
         return new LettuceConnectionFactory(staticMasterReplicaConfiguration, clientConfig);
     }
-
 
     private static class RedisInstance {
         private String host;
@@ -74,4 +57,29 @@ public class RedisConfiguration {
             this.port = port;
         }
     }
+
+    RedisInstance getMaster() {
+        return master;
+    }
+
+    void setMaster(RedisInstance master) {
+        this.master = master;
+    }
+
+    List<RedisInstance> getSlaves() {
+        return slaves;
+    }
+
+    void setSlaves(List<RedisInstance> slaves) {
+        this.slaves = slaves;
+    }
+
+    public List<RedisInstance> getSentinels() {
+        return sentinels;
+    }
+
+    public void setSentinels(List<RedisInstance> sentinels) {
+        this.sentinels = sentinels;
+    }
+
 }
